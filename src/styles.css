@@ -252,9 +252,215 @@
       0 0 32px rgba(59, 130, 246, 0.35);
   }
 
+  .funnel-pill-outline {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03)) padding-box,
+      linear-gradient(135deg, #e879f9 0%, #a855f7 30%, #7c3aed 55%, #6366f1 80%, #3b82f6 100%)
+        border-box;
+    box-shadow:
+      0 0 18px rgba(168, 85, 247, 0.5),
+      0 0 32px rgba(99, 102, 241, 0.25);
+  }
+
+  .funnel-pill-outline:hover {
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)) padding-box,
+      linear-gradient(135deg, #f0abfc 0%, #c084fc 25%, #8b5cf6 50%, #818cf8 75%, #60a5fa 100%)
+        border-box;
+    box-shadow:
+      0 0 22px rgba(192, 132, 252, 0.6),
+      0 0 36px rgba(99, 102, 241, 0.35);
+  }
+
   .funnel-pill-selected {
-    background: linear-gradient(90deg, #a855f7 0%, #7c3aed 50%, #6d28d9 100%);
-    box-shadow: 0 0 30px rgba(168, 85, 247, 0.55);
+    border: 2px solid transparent;
+    background:
+      linear-gradient(90deg, #a855f7 0%, #7c3aed 45%, #6366f1 75%, #3b82f6 100%) padding-box,
+      linear-gradient(135deg, #f0abfc 0%, #c084fc 35%, #8b5cf6 65%, #60a5fa 100%) border-box;
+    box-shadow:
+      0 0 28px rgba(168, 85, 247, 0.7),
+      0 0 44px rgba(59, 130, 246, 0.4);
+  }
+
+  .funnel-status-pill[data-tone="purple"] {
+    animation: funnel-status-pill-glow-purple 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill[data-tone="blue"] {
+    animation: funnel-status-pill-glow-blue 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill[data-tone="orange"] {
+    animation: funnel-status-pill-glow-orange 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill[data-tone="cyan"] {
+    animation: funnel-status-pill-glow-cyan 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill[data-tone="green"] {
+    animation: funnel-status-pill-glow-green 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill[data-tone="amber"] {
+    animation: funnel-status-pill-glow-amber 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill-icon[data-tone="purple"] {
+    animation: funnel-status-pill-icon-pulse-purple 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill-icon[data-tone="blue"] {
+    animation: funnel-status-pill-icon-pulse-blue 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill-icon[data-tone="orange"] {
+    animation: funnel-status-pill-icon-pulse-orange 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill-icon[data-tone="cyan"] {
+    animation: funnel-status-pill-icon-pulse-cyan 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill-icon[data-tone="green"] {
+    animation: funnel-status-pill-icon-pulse-green 2.4s ease-in-out infinite;
+  }
+
+  .funnel-status-pill-icon[data-tone="amber"] {
+    animation: funnel-status-pill-icon-pulse-amber 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes funnel-status-pill-glow-purple {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(168, 85, 247, 0.5);
+  }
+}
+
+@keyframes funnel-status-pill-glow-blue {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(59, 130, 246, 0.55);
+  }
+}
+
+@keyframes funnel-status-pill-glow-orange {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(249, 115, 22, 0.55);
+  }
+}
+
+@keyframes funnel-status-pill-glow-cyan {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(34, 211, 238, 0.5);
+  }
+}
+
+@keyframes funnel-status-pill-glow-green {
+  0%,
+  100% {
+    box-shadow: 0 0 22px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 38px rgba(16, 185, 129, 0.55);
+  }
+}
+
+@keyframes funnel-status-pill-glow-amber {
+  0%,
+  100% {
+    box-shadow: 0 0 22px rgba(245, 158, 11, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 38px rgba(245, 158, 11, 0.55);
+  }
+}
+
+@keyframes funnel-status-pill-icon-pulse-purple {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(168, 85, 247, 0.8);
+  }
+}
+
+@keyframes funnel-status-pill-icon-pulse-blue {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.45);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.85);
+  }
+}
+
+@keyframes funnel-status-pill-icon-pulse-orange {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(249, 115, 22, 0.45);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(249, 115, 22, 0.85);
+  }
+}
+
+@keyframes funnel-status-pill-icon-pulse-cyan {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(34, 211, 238, 0.8);
+  }
+}
+
+@keyframes funnel-status-pill-icon-pulse-green {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.8);
+  }
+}
+
+@keyframes funnel-status-pill-icon-pulse-amber {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(245, 158, 11, 0.8);
   }
 }
 

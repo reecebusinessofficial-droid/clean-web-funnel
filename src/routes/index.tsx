@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LaurelWreath } from "../components/funnel/LaurelWreath";
 import { PaywallExpressCheckout } from "../components/funnel/PaywallExpressCheckout";
+import {
+  screenNameForStep,
+  trackPaywallOpened,
+  trackQuizAnswered,
+  trackScreenView,
+} from "../lib/mixpanel";
 import { trackMetaInitiateCheckout } from "../lib/metaPixel";
 import {
   createContext,
@@ -68,8 +74,14 @@ function tokenizeTypewriterText(text: string): string[] {
 /** Shared typewriter pacing — aligned with mobile onboarding */
 const TYPEWRITER_CHAR_DELAY = 40;
 const TYPEWRITER_HOLD_MS = 2600;
-const TYPEWRITER_PLAN_CHAR_DELAY = 40;
-const TYPEWRITER_PLAN_PAGE_HOLD_MS = 4500;
+
+/** Shared layout for quiz transitions + personalised plan typewriter screens */
+const TYPEWRITER_SCREEN_OFFSET = "-translate-y-[30px]";
+const TYPEWRITER_SCREEN_CENTER = `relative mx-auto flex w-full max-w-md flex-col items-center justify-center px-8 text-center ${TYPEWRITER_SCREEN_OFFSET}`;
+const TYPEWRITER_SCREEN_FULL = `${TYPEWRITER_SCREEN_CENTER} min-h-screen`;
+const TYPEWRITER_TEXT_BADGE = "text-3xl font-extrabold leading-tight";
+const TYPEWRITER_TEXT_QUOTE =
+  "text-2xl font-extrabold leading-snug drop-shadow-[0_0_25px_rgba(255,255,255,0.35)]";
 
 /** Mobile parity layout (390px viewport) */
 const FUNNEL_SHELL = "funnel-screen-shell";
@@ -81,9 +93,9 @@ const FUNNEL_CTA =
 const FUNNEL_CTA_ROW =
   "relative flex w-full min-h-[66px] items-center justify-between rounded-[50px] funnel-cta px-6 text-[18px] font-bold transition-transform active:scale-[0.98]";
 const FUNNEL_PILL =
-  "flex w-full items-center gap-3 rounded-[50px] border px-4 py-3 text-left transition-all";
-const FUNNEL_PILL_ON = "border-transparent funnel-pill-selected";
-const FUNNEL_PILL_OFF = "border-purple-900/60 bg-white/[0.02] hover:border-purple-700";
+  "flex w-full items-center gap-3 rounded-[50px] px-4 py-3 text-left transition-all";
+const FUNNEL_PILL_ON = "funnel-pill-selected";
+const FUNNEL_PILL_OFF = "funnel-pill-outline";
 
 function scrollPageToTop() {
   if (typeof window === "undefined") return;
@@ -193,29 +205,54 @@ function useTypewriter({
   };
 }
 
+function TypewriterCursor() {
+  return (
+    <span className="relative inline-block w-0 align-middle">
+      <span
+        className="absolute left-0 top-1/2 w-[2px] -translate-y-1/2 animate-pulse bg-white"
+        style={{ height: "1em" }}
+      />
+    </span>
+  );
+}
+
 function TypeText({
   full,
   typed,
   showCursor,
   className,
+  stableLayout = false,
 }: {
   full: string;
   typed: string;
   showCursor: boolean;
   className?: string;
+  /** Full string stays in layout; reveal by opacity so line breaks never reflow mid-word. */
+  stableLayout?: boolean;
 }) {
+  const visibleCount = typed.length;
+
+  if (stableLayout) {
+    return (
+      <span className={`whitespace-pre-line ${className ?? ""}`}>
+        {full.split("").map((char, i) => (
+          <span key={i}>
+            <span className={i < visibleCount ? "opacity-100" : "opacity-0"} aria-hidden={i >= visibleCount}>
+              {char}
+            </span>
+            {showCursor && i === visibleCount - 1 ? <TypewriterCursor /> : null}
+          </span>
+        ))}
+        {showCursor && visibleCount === 0 ? <TypewriterCursor /> : null}
+      </span>
+    );
+  }
+
   const remaining = full.slice(typed.length);
   return (
     <span className={`whitespace-pre-line ${className ?? ""}`}>
       {typed}
-      {showCursor && (
-        <span className="relative inline-block w-0 align-middle">
-          <span
-            className="absolute left-0 top-1/2 w-[2px] -translate-y-1/2 animate-pulse bg-white"
-            style={{ height: "1em" }}
-          />
-        </span>
-      )}
+      {showCursor ? <TypewriterCursor /> : null}
       <span aria-hidden className="invisible">
         {remaining || "\u200B"}
       </span>
@@ -325,7 +362,6 @@ function StepTransition({
 }
 
 type Step =
-  | "welcome"
   | "transition1"
   | "q_frequency"
   | "q_frustrates"
@@ -344,9 +380,8 @@ type Step =
   | "reset";
 
 const STEP_ORDER: Step[] = [
-  "welcome",
-  "transition1",
   "q_frequency",
+  "transition1",
   "q_frustrates",
   "q_pulls",
   "q_worries",
@@ -365,15 +400,7 @@ const STEP_ORDER: Step[] = [
 
 const FADE_STEPS = new Set<Step>(["transition1", "transition2", "calculating", "welcome2"]);
 
-const OPTIONS = [
-  { id: "weed", label: "Weed", emoji: "🌿" },
-  { id: "cocaine", label: "Cocaine", emoji: "❄️" },
-  { id: "alcohol", label: "Alcohol", emoji: "🍺" },
-  { id: "lean", label: "Lean", emoji: "🥤" },
-  { id: "smoking", label: "Smoking & Vaping", emoji: "💨" },
-];
-
-type StatusTone = "purple" | "cyan" | "green" | "amber";
+type StatusTone = "purple" | "blue" | "orange" | "cyan" | "green" | "amber";
 
 const TONE_STYLES: Record<StatusTone, { ring: string; bg: string; dot: string; text: string; glow: string }> = {
   purple: {
@@ -382,6 +409,20 @@ const TONE_STYLES: Record<StatusTone, { ring: string; bg: string; dot: string; t
     dot: "bg-purple-400/30",
     text: "text-white/85",
     glow: "shadow-[0_0_25px_rgba(168,85,247,0.25)]",
+  },
+  blue: {
+    ring: "ring-blue-400/50",
+    bg: "bg-white/[0.03]",
+    dot: "bg-blue-400/35",
+    text: "text-white/85",
+    glow: "shadow-[0_0_28px_rgba(59,130,246,0.4)]",
+  },
+  orange: {
+    ring: "ring-orange-400/50",
+    bg: "bg-white/[0.03]",
+    dot: "bg-orange-400/35",
+    text: "text-white/85",
+    glow: "shadow-[0_0_28px_rgba(249,115,22,0.4)]",
   },
   cyan: {
     ring: "ring-cyan-400/40",
@@ -424,9 +465,8 @@ function Starfield() {
 
 function Index() {
   /** Dev: set to `"reset"` to land on 7-day reset + paywall for testing */
-  const [step, setStep] = useState<Step>("welcome");
+  const [step, setStep] = useState<Step>("q_frequency");
   const [navDirection, setNavDirection] = useState<NavDirection>("forward");
-  const [selected, setSelected] = useState<string>("");
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({
     q_frequency: "",
     q_frustrates: "",
@@ -470,7 +510,13 @@ function Index() {
     if (initiateCheckoutTracked.current) return;
     initiateCheckoutTracked.current = true;
     trackMetaInitiateCheckout();
+    trackPaywallOpened();
   }, [paywallOpen]);
+
+  useEffect(() => {
+    const screenName = screenNameForStep(step);
+    if (screenName) trackScreenView(screenName);
+  }, [step]);
 
   useEffect(() => {
     const onPageShow = () => scrollPageToTop();
@@ -524,24 +570,12 @@ function Index() {
 
           return (
             <>
-      {visibleStep === "welcome" && (
-        <WelcomeStep selected={selected} setSelected={setSelected} onContinue={() => go("transition1")} />
-      )}
-
-      {visibleStep === "transition1" && (
-        <TransitionStep
-          cacheId="transition1"
-          text="Now let's personalise your Clean system"
-          variant="badge"
-          onDone={() => go("q_frequency")}
-        />
-      )}
-
       {visibleStep === "q_frequency" && (
         <ChoiceStep
           progress={progress}
           onBack={back}
-          tone="purple"
+          tone="blue"
+          analyticsQuestion="substance_goal"
           status="Understanding Your Goal"
           question="Are you looking to cut down or quit cocaine?"
           options={[
@@ -555,11 +589,21 @@ function Index() {
         />
       )}
 
+      {visibleStep === "transition1" && (
+        <TransitionStep
+          cacheId="transition1"
+          text="Now let's personalise your Clean system"
+          variant="badge"
+          onDone={() => go("q_frustrates")}
+        />
+      )}
+
       {visibleStep === "q_frustrates" && (
         <ChoiceStep
           progress={progress}
           onBack={back}
-          tone="purple"
+          tone="orange"
+          analyticsQuestion="frustration_question"
           status="Mapping Behaviour Patterns"
           question="What frustrates you about your cocaine use?"
           options={[
@@ -582,6 +626,7 @@ function Index() {
           progress={progress}
           onBack={back}
           tone="green"
+          analyticsQuestion="triggers_question"
           status="Adapting Relapse Prevention"
           question="What usually pulls you back in?"
           options={[
@@ -603,6 +648,7 @@ function Index() {
           progress={progress}
           onBack={back}
           tone="amber"
+          analyticsQuestion="worries_question"
           status="Analysing Risk Patterns"
           question="What worries you most if this keeps continuing?"
           options={[
@@ -624,6 +670,7 @@ function Index() {
           progress={progress}
           onBack={back}
           tone="cyan"
+          analyticsQuestion="problem_duration"
           status="Building Recovery Timeline"
           question="How long have you felt this needed to change?"
           options={[
@@ -662,6 +709,7 @@ function Index() {
           progress={progress}
           onBack={back}
           tone="green"
+          analyticsQuestion="difference_question"
           status="Prioritising Recovery Goals"
           question="What would make the biggest difference in your life right now?"
           options={[
@@ -681,14 +729,14 @@ function Index() {
 
       {visibleStep === "calculating" && (
         <CalculatingStep
-          substance={OPTIONS.find((o) => o.id === selected)?.label.toLowerCase() ?? "cocaine"}
+          substance="cocaine"
           onDone={next}
         />
       )}
 
       {visibleStep === "results" && (
         <ResultsStep
-          substance={OPTIONS.find((o) => o.id === selected)?.label.toLowerCase() ?? "cocaine"}
+          substance="cocaine"
           onContinue={next}
         />
       )}
@@ -709,7 +757,7 @@ function Index() {
 
       {visibleStep === "plan" && (
         <PlanStep
-          substance={OPTIONS.find((o) => o.id === selected)?.label.toLowerCase() ?? "cocaine"}
+          substance="cocaine"
           worries={answers.q_worries as string}
           howlong={answers.q_howlong as string}
           cost={cost}
@@ -724,11 +772,7 @@ function Index() {
         }}
       </StepTransition>
 
-      <PaywallSheet
-        open={paywallOpen}
-        onClose={() => setPaywallOpen(false)}
-        substanceId={selected || "cocaine"}
-      />
+      <PaywallSheet open={paywallOpen} onClose={() => setPaywallOpen(false)} />
     </main>
   );
 }
@@ -817,78 +861,6 @@ function CalculatingStep({ substance, onDone }: { substance: string; onDone: () 
   );
 }
 
-function WelcomeStep({
-  selected,
-  setSelected,
-  onContinue,
-}: {
-  selected: string;
-  setSelected: (id: string) => void;
-  onContinue: () => void;
-}) {
-  return (
-    <div
-      className={`${FUNNEL_SHELL} ${FUNNEL_PAD} pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(3rem,env(safe-area-inset-top))]`}
-    >
-      <header className={`${FUNNEL_WELCOME_E_W} text-center`}>
-        <p className="text-lg font-semibold text-purple-400">Welcome to</p>
-        <h1 className="mt-2 text-7xl font-extrabold tracking-tight drop-shadow-[0_0_30px_rgba(168,85,247,0.45)]">
-          Clean
-        </h1>
-        <div className="mx-auto mt-3 h-px w-32 bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
-        <h2 className="mt-4 text-center text-[28px] font-extrabold italic leading-[34px]">
-          Now, let's customise everything around you...
-        </h2>
-      </header>
-
-      <ul className={`${FUNNEL_WELCOME_E_W} mt-8 flex flex-col gap-3`}>
-        {OPTIONS.map((opt) => {
-          const active = selected === opt.id;
-          return (
-            <li key={opt.id}>
-              <button
-                onClick={() => setSelected(opt.id)}
-                className={[FUNNEL_PILL, active ? FUNNEL_PILL_ON : FUNNEL_PILL_OFF].join(" ")}
-              >
-                <span
-                  className={[
-                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl",
-                    active ? "bg-white/20" : "bg-purple-950/60",
-                  ].join(" ")}
-                >
-                  {opt.emoji}
-                </span>
-                <span className="text-base font-semibold">{opt.label}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      <div className={`${FUNNEL_WELCOME_E_W} mt-auto pt-6`}>
-        <button
-          type="button"
-          onClick={selected ? onContinue : undefined}
-          disabled={!selected}
-          className={[
-            FUNNEL_CTA,
-            selected ? "" : "cursor-not-allowed !bg-white/10 !shadow-none text-white/40",
-          ].join(" ")}
-        >
-          Customise My Clean
-          <span aria-hidden>›</span>
-        </button>
-        <p className="mt-5 text-center text-sm text-white/60">
-          Already have an account?{" "}
-          <a href="#" className="text-white underline">
-            Log in
-          </a>
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function TransitionStep({
   text,
   variant,
@@ -910,8 +882,8 @@ function TransitionStep({
 
   if (variant === "quote") {
     return (
-      <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-8 text-center">
-        <h2 className="text-2xl font-extrabold leading-snug drop-shadow-[0_0_25px_rgba(255,255,255,0.35)]">
+      <div className={TYPEWRITER_SCREEN_FULL}>
+        <h2 className={TYPEWRITER_TEXT_QUOTE}>
           <TypeText full={text} typed={typed} showCursor={showCursor} />
         </h2>
       </div>
@@ -919,13 +891,13 @@ function TransitionStep({
   }
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-8 text-center">
+    <div className={TYPEWRITER_SCREEN_FULL}>
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-500/30 ring-1 ring-indigo-300/50 shadow-[0_0_40px_rgba(129,140,248,0.6)]">
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </div>
-      <h2 className="mt-8 text-3xl font-extrabold leading-tight">
+      <h2 className={`mt-8 ${TYPEWRITER_TEXT_BADGE}`}>
         <TypeText full={text} typed={typed} showCursor={showCursor} />
       </h2>
     </div>
@@ -960,8 +932,14 @@ function TopBar({ progress, onBack }: { progress: number; onBack: () => void }) 
 function StatusPill({ tone, label }: { tone: StatusTone; label: string }) {
   const s = TONE_STYLES[tone];
   return (
-    <div className={`mx-auto mt-8 inline-flex items-center gap-2 rounded-full px-4 py-2 ring-1 ${s.bg} ${s.ring} ${s.glow}`}>
-      <span className={`flex h-5 w-5 items-center justify-center rounded-full ${s.dot}`}>
+    <div
+      data-tone={tone}
+      className={`funnel-status-pill mx-auto mt-8 inline-flex items-center gap-2 rounded-full px-4 py-2 ring-1 ${s.bg} ${s.ring} ${s.glow}`}
+    >
+      <span
+        data-tone={tone}
+        className={`funnel-status-pill-icon flex h-5 w-5 items-center justify-center rounded-full ${s.dot}`}
+      >
         <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="20 6 9 17 4 12" />
         </svg>
@@ -977,6 +955,7 @@ function ChoiceStep({
   progress,
   onBack,
   tone,
+  analyticsQuestion,
   status,
   question,
   options,
@@ -988,6 +967,7 @@ function ChoiceStep({
   progress: number;
   onBack: () => void;
   tone: StatusTone;
+  analyticsQuestion: string;
   status: string;
   question: string;
   options: ChoiceOpt[];
@@ -1005,6 +985,8 @@ function ChoiceStep({
       onChange(arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id]);
     } else {
       onChange(id);
+      const label = options.find((o) => o.id === id)?.label;
+      trackQuizAnswered(analyticsQuestion, id, label ? { answer_label: label } : undefined);
       setTimeout(onContinue, 280);
     }
   };
@@ -1087,6 +1069,11 @@ function CostStep({
   const monthly = useMemo(() => Math.round(cost * 30), [cost]);
   const pct = (cost / 200) * 100;
 
+  const handleContinue = () => {
+    trackQuizAnswered("cost_question", String(cost), { cost_daily: cost, cost_monthly: monthly });
+    onContinue();
+  };
+
   return (
     <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col px-6 pb-10 pt-12">
       <TopBar progress={progress} onBack={onBack} />
@@ -1133,7 +1120,7 @@ function CostStep({
 
       <div className="mt-10">
         <button
-          onClick={onContinue}
+          onClick={handleContinue}
           className="flex w-full items-center justify-center gap-2 rounded-full funnel-cta px-6 py-5 text-lg font-bold transition-transform active:scale-[0.98]"
         >
           Continue
@@ -1248,7 +1235,7 @@ function Welcome2Step({ onContinue }: { onContinue: () => void }) {
     <div
       className={`${FUNNEL_SHELL} ${FUNNEL_PAD} pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(3rem,env(safe-area-inset-top))]`}
     >
-      <div className="flex flex-1 flex-col items-center justify-center text-center">
+      <div className="flex flex-1 flex-col items-center justify-center text-center -translate-y-[30px]">
         <div className={`${FUNNEL_WELCOME_E_W} w-full`}>
           <p className="text-lg font-semibold text-purple-400">Welcome to</p>
           <h1 className="mt-3 text-7xl font-extrabold tracking-tight drop-shadow-[0_0_35px_rgba(168,85,247,0.5)]">
@@ -1261,7 +1248,7 @@ function Welcome2Step({ onContinue }: { onContinue: () => void }) {
           <TypeText full={headline} typed={h} showCursor={headlineCursor} />
         </h2>
 
-        <p className="mx-auto mt-5 max-w-[296px] text-[21.5px] leading-[29px] text-white/80">
+        <p className="mx-auto mt-5 max-w-[296px] text-xl leading-[27px] text-white/80">
           <TypeText full={body} typed={b} showCursor={bodyCursor} />
         </p>
       </div>
@@ -1308,6 +1295,11 @@ function GoalsStep({
     }
   };
   const ready = value.length === MAX;
+
+  const handleContinue = () => {
+    trackQuizAnswered("motivation_question", value);
+    onContinue();
+  };
 
   return (
     <div
@@ -1367,7 +1359,7 @@ function GoalsStep({
 
         <div className="mt-auto pt-8">
           <button
-            onClick={ready ? onContinue : undefined}
+            onClick={ready ? handleContinue : undefined}
             disabled={!ready}
             className={[
               "relative flex w-full min-h-[66px] items-center justify-between rounded-[50px] px-3 pl-8 text-[18px] font-bold transition-all",
@@ -1691,8 +1683,8 @@ function PlanStep({
   const { typed, done, showCursor } = useTypewriter({
     cacheId: `plan-page-${page}`,
     text: pageText,
-    charDelay: TYPEWRITER_PLAN_CHAR_DELAY,
-    holdAfterMs: TYPEWRITER_PLAN_PAGE_HOLD_MS,
+    charDelay: TYPEWRITER_CHAR_DELAY,
+    holdAfterMs: TYPEWRITER_HOLD_MS,
     onComplete: () => {
       if (!isLast) setPage((p) => p + 1);
     },
@@ -1737,9 +1729,9 @@ function PlanStep({
     <div
       className={`${FUNNEL_SHELL} ${FUNNEL_PAD} pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[max(3rem,env(safe-area-inset-top))]`}
     >
-      <div className="flex flex-1 items-center justify-center py-8">
-        <h2 className="mx-auto max-w-[280px] text-center text-[21.5px] font-extrabold leading-[29px] drop-shadow-[0_0_25px_rgba(255,255,255,0.2)]">
-          <TypeText full={pageText} typed={typed} showCursor={showCursor} />
+      <div className={`${TYPEWRITER_SCREEN_CENTER} flex-1 min-h-0`}>
+        <h2 className={TYPEWRITER_TEXT_QUOTE}>
+          <TypeText full={pageText} typed={typed} showCursor={showCursor} stableLayout />
         </h2>
       </div>
 
@@ -1918,14 +1910,14 @@ const PAYWALL_COPY: Record<
   },
 };
 
+const PAYWALL_HEADLINE = "Regain your sleep, money & health for less than a half";
+
 function PaywallSheet({
   open,
   onClose,
-  substanceId,
 }: {
   open: boolean;
   onClose: () => void;
-  substanceId: string;
 }) {
   const [seconds, setSeconds] = useState(5 * 60);
   const [locale, setLocale] = useState<PaywallLocale>("us");
@@ -2014,14 +2006,7 @@ function PaywallSheet({
   const mm = Math.floor(seconds / 60);
   const ss = String(seconds % 60).padStart(2, "0");
 
-  const regainHeadlines: Record<string, string> = {
-    cocaine: "Regain your sleep, money & health for less than a half",
-    weed: "Regain your focus, energy & health for less than a gram",
-    lean: "Morning clarity for less than a cup",
-    alcohol: "Morning clarity for less than a drink",
-    smoking: "Clean lungs for less than a pack or pod",
-  };
-  const headlineFull = regainHeadlines[substanceId] ?? regainHeadlines.cocaine;
+  const headlineFull = PAYWALL_HEADLINE;
   const headlineWords = headlineFull.split(" ");
   const headlineLead =
     headlineWords.length >= 3 ? headlineWords.slice(0, -2).join(" ") : headlineFull;

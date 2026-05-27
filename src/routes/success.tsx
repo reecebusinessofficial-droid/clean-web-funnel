@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check, ChevronRight } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { trackMetaPurchase } from "../lib/metaPixel";
+import { trackPurchaseCompleted, trackScreenView } from "../lib/mixpanel";
 
 export const Route = createFileRoute("/success")({
   head: () => ({
@@ -28,12 +29,14 @@ const features = [
 ];
 
 function SuccessPage() {
-  const purchaseTracked = useRef(false);
+  const analyticsTracked = useRef(false);
 
   useEffect(() => {
-    if (purchaseTracked.current) return;
-    purchaseTracked.current = true;
+    if (analyticsTracked.current) return;
+    analyticsTracked.current = true;
+    trackScreenView("success");
     trackMetaPurchase();
+    trackPurchaseCompleted();
   }, []);
 
   return (
