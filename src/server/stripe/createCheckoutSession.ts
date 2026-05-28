@@ -1,10 +1,6 @@
-import type Stripe from "stripe";
-
 import { getStripeClient } from "./client";
-import { getActiveRecurringPrice } from "./getActiveRecurringPrice";
 
-const TRIAL_DAYS = 3;
-const INTRO_UNIT_AMOUNT = 100;
+const INTRO_PRICE_ID = "price_1TcAYk1Wk1spUrOQTJF0jk9p";
 
 export type CreateCheckoutSessionInput = {
   stripeSecretKey: string;
@@ -17,39 +13,27 @@ export type CreateCheckoutSessionResult = {
   sessionId: string;
 };
 
+/**
+ * Creates a one-time hosted Checkout Session for the intro charge.
+ * Saves the payment method with setup_future_usage: "off_session" so
+ * the customer can be billed again later without any user interaction.
+ */
 export async function createCheckoutSession({
   stripeSecretKey,
-  stripeProductId,
   origin,
 }: CreateCheckoutSessionInput): Promise<CreateCheckoutSessionResult> {
   const stripe = getStripeClient(stripeSecretKey);
-  const recurringPrice = await getActiveRecurringPrice(stripeSecretKey, stripeProductId);
 
-  const introLineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
-    quantity: 1,
-    price_data: {
-      currency: recurringPrice.currency,
-      unit_amount: INTRO_UNIT_AMOUNT,
-      product_data: {
-        name: "3-day introductory access",
-      },
-    },
-  };
-
-  // Do not pre-create a Customer without an address — Stripe Tax rejects that when
-  // automatic tax is enabled (Dashboard default or explicit). Checkout creates the
-  // Customer and collects billing details on the hosted page instead.
   const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
+    mode: "payment",
     line_items: [
       {
-        price: recurringPrice.id,
+        price: INTRO_PRICE_ID,
         quantity: 1,
       },
-      introLineItem,
     ],
-    subscription_data: {
-      trial_period_days: TRIAL_DAYS,
+    payment_intent_data: {
+      setup_future_usage: "off_session",
       metadata: {
         funnel: "clean_web",
         intro_payment: "true",
