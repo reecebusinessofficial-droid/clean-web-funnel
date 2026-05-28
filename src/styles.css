@@ -252,35 +252,9 @@
       0 0 32px rgba(59, 130, 246, 0.35);
   }
 
-  .funnel-pill-outline {
-    border: 2px solid transparent;
-    background:
-      linear-gradient(rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03)) padding-box,
-      linear-gradient(135deg, #e879f9 0%, #a855f7 30%, #7c3aed 55%, #6366f1 80%, #3b82f6 100%)
-        border-box;
-    box-shadow:
-      0 0 18px rgba(168, 85, 247, 0.5),
-      0 0 32px rgba(99, 102, 241, 0.25);
-  }
-
-  .funnel-pill-outline:hover {
-    background:
-      linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)) padding-box,
-      linear-gradient(135deg, #f0abfc 0%, #c084fc 25%, #8b5cf6 50%, #818cf8 75%, #60a5fa 100%)
-        border-box;
-    box-shadow:
-      0 0 22px rgba(192, 132, 252, 0.6),
-      0 0 36px rgba(99, 102, 241, 0.35);
-  }
-
   .funnel-pill-selected {
-    border: 2px solid transparent;
-    background:
-      linear-gradient(90deg, #a855f7 0%, #7c3aed 45%, #6366f1 75%, #3b82f6 100%) padding-box,
-      linear-gradient(135deg, #f0abfc 0%, #c084fc 35%, #8b5cf6 65%, #60a5fa 100%) border-box;
-    box-shadow:
-      0 0 28px rgba(168, 85, 247, 0.7),
-      0 0 44px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(90deg, #a855f7 0%, #7c3aed 50%, #6d28d9 100%);
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.55);
   }
 
   .funnel-status-pill[data-tone="purple"] {
@@ -559,7 +533,8 @@
 .clean-cta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 12px;
   width: 100%;
   padding: 20px 28px;
   border-radius: 999px;

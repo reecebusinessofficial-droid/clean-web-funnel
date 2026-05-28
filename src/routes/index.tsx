@@ -93,9 +93,12 @@ const FUNNEL_CTA =
 const FUNNEL_CTA_ROW =
   "relative flex w-full min-h-[66px] items-center justify-between rounded-[50px] funnel-cta px-6 text-[18px] font-bold transition-transform active:scale-[0.98]";
 const FUNNEL_PILL =
-  "flex w-full items-center gap-3 rounded-[50px] px-4 py-3 text-left transition-all";
-const FUNNEL_PILL_ON = "funnel-pill-selected";
-const FUNNEL_PILL_OFF = "funnel-pill-outline";
+  "flex w-full items-center gap-3 rounded-[50px] border px-4 py-3 text-left transition-all";
+const FUNNEL_PILL_ON = "border-transparent funnel-pill-selected";
+const FUNNEL_PILL_OFF = "border-purple-900/60 bg-white/[0.02] hover:border-purple-700";
+
+const LANDING_IMG_LOGO_GREY = "/images/logo%20grey.png";
+const LANDING_IMG_CHARACTER = "/images/character-in-bed.png";
 
 function scrollPageToTop() {
   if (typeof window === "undefined") return;
@@ -227,22 +230,46 @@ function TypeText({
   typed: string;
   showCursor: boolean;
   className?: string;
-  /** Full string stays in layout; reveal by opacity so line breaks never reflow mid-word. */
+  /** Full string stays in layout; words are nowrap boxes so wrap decisions happen before reveal. */
   stableLayout?: boolean;
 }) {
   const visibleCount = typed.length;
+  const stableTokens = useMemo(
+    () => (stableLayout ? tokenizeTypewriterText(full) : null),
+    [stableLayout, full],
+  );
 
-  if (stableLayout) {
+  if (stableLayout && stableTokens) {
+    let charIndex = 0;
     return (
       <span className={`whitespace-pre-line ${className ?? ""}`}>
-        {full.split("").map((char, i) => (
-          <span key={i}>
-            <span className={i < visibleCount ? "opacity-100" : "opacity-0"} aria-hidden={i >= visibleCount}>
-              {char}
-            </span>
-            {showCursor && i === visibleCount - 1 ? <TypewriterCursor /> : null}
-          </span>
-        ))}
+        {stableTokens.map((token, ti) => {
+          const tokenStart = charIndex;
+          charIndex += token.length;
+          const isWord = token !== "\n" && !/^\s+$/.test(token);
+          const chars = token.split("").map((char, ci) => {
+            const i = tokenStart + ci;
+            return (
+              <span key={ci}>
+                <span
+                  className={i < visibleCount ? "opacity-100" : "opacity-0"}
+                  aria-hidden={i >= visibleCount}
+                >
+                  {char}
+                </span>
+                {showCursor && i === visibleCount - 1 ? <TypewriterCursor /> : null}
+              </span>
+            );
+          });
+          if (isWord) {
+            return (
+              <span key={ti} className="inline-block whitespace-nowrap">
+                {chars}
+              </span>
+            );
+          }
+          return <span key={ti}>{chars}</span>;
+        })}
         {showCursor && visibleCount === 0 ? <TypewriterCursor /> : null}
       </span>
     );
@@ -362,6 +389,7 @@ function StepTransition({
 }
 
 type Step =
+  | "landing"
   | "transition1"
   | "q_frequency"
   | "q_frustrates"
@@ -380,6 +408,7 @@ type Step =
   | "reset";
 
 const STEP_ORDER: Step[] = [
+  "landing",
   "q_frequency",
   "transition1",
   "q_frustrates",
@@ -398,7 +427,7 @@ const STEP_ORDER: Step[] = [
   "reset",
 ];
 
-const FADE_STEPS = new Set<Step>(["transition1", "transition2", "calculating", "welcome2"]);
+const FADE_STEPS = new Set<Step>(["landing", "transition1", "transition2", "calculating", "welcome2"]);
 
 type StatusTone = "purple" | "blue" | "orange" | "cyan" | "green" | "amber";
 
@@ -465,7 +494,7 @@ function Starfield() {
 
 function Index() {
   /** Dev: set to `"reset"` to land on 7-day reset + paywall for testing */
-  const [step, setStep] = useState<Step>("q_frequency");
+  const [step, setStep] = useState<Step>("landing");
   const [navDirection, setNavDirection] = useState<NavDirection>("forward");
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({
     q_frequency: "",
@@ -514,6 +543,7 @@ function Index() {
   }, [paywallOpen]);
 
   useEffect(() => {
+    console.log("[analytics] index screen effect fired", step);
     const screenName = screenNameForStep(step);
     if (screenName) trackScreenView(screenName);
   }, [step]);
@@ -546,8 +576,10 @@ function Index() {
     setAnswers((a) => ({ ...a, [key]: value }));
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-[#0a0414] text-white">
-      <Starfield />
+    <main
+      className={`relative min-h-dvh overflow-hidden text-white ${step === "landing" ? "bg-black" : "bg-[#0a0414]"}`}
+    >
+      {step !== "landing" && <Starfield />}
 
       <StepTransition
         stepKey={step}
@@ -570,6 +602,8 @@ function Index() {
 
           return (
             <>
+      {visibleStep === "landing" && <LandingStep onContinue={next} />}
+
       {visibleStep === "q_frequency" && (
         <ChoiceStep
           progress={progress}
@@ -1203,6 +1237,89 @@ function ResultsStep({ substance, onContinue }: { substance: string; onContinue:
   );
 }
 
+function LandingTopGlow() {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0 h-[min(42vh,300px)] overflow-hidden">
+      <div className="absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-purple-600/20 blur-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1a0b2e]/40 via-black/80 to-black" />
+    </div>
+  );
+}
+
+function LandingStep({ onContinue }: { onContinue: () => void }) {
+  return (
+    <div
+      className={`${FUNNEL_SHELL} relative overflow-y-auto bg-black pb-[max(1.25rem,env(safe-area-inset-bottom))]`}
+    >
+      <section className={`relative ${FUNNEL_PAD} pt-[max(2rem,env(safe-area-inset-top))] pb-1`}>
+        <LandingTopGlow />
+        <header className={`${FUNNEL_WELCOME_E_W} relative z-10 mx-auto text-center`}>
+          <p className="text-sm font-semibold text-purple-400">Welcome to</p>
+          <h1 className="mt-0.5 text-5xl font-extrabold tracking-tight drop-shadow-[0_0_22px_rgba(168,85,247,0.4)]">
+            Clean
+          </h1>
+          <div className="mx-auto mt-1.5 h-px w-28 bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+          <h2 className="mt-2 text-center text-[26px] font-normal italic leading-[31px] text-white/95">
+            Quit or cut down on Cocaine, effectively.
+          </h2>
+        </header>
+      </section>
+
+      <section
+        className={`${FUNNEL_PAD} ${FUNNEL_WELCOME_E_W} relative z-10 mx-auto flex w-full flex-col items-center overflow-visible`}
+      >
+        <img
+          src={LANDING_IMG_LOGO_GREY}
+          alt=""
+          className="w-full object-contain"
+          aria-hidden
+        />
+
+        <img
+          src={LANDING_IMG_CHARACTER}
+          alt=""
+          className="mt-2 w-full origin-top scale-[1.2] object-contain"
+        />
+
+        <blockquote className="mt-4 max-w-[300px] text-center">
+          <p className="text-lg font-semibold leading-snug text-white/95">
+            &ldquo;Like a mate helping you quit.&rdquo;
+          </p>
+        </blockquote>
+
+        <div className="mt-6 w-full">
+          <button type="button" onClick={onContinue} className={`${FUNNEL_CTA_ROW} pl-8 pr-2.5`}>
+            <span className="flex-1 text-center">Start my transformation</span>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-black">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        <nav className="mt-5 flex items-center justify-center gap-8 text-sm text-white/40">
+          <a href="#" className="hover:text-white/60">
+            Terms
+          </a>
+          <a href="#" className="hover:text-white/60">
+            Privacy
+          </a>
+        </nav>
+      </section>
+    </div>
+  );
+}
+
 function Welcome2Step({ onContinue }: { onContinue: () => void }) {
   const headline = "Built for the hard days.";
   const body = "Anyone can feel motivated for a day. The hard part is staying consistent when cravings come back.";
@@ -1669,7 +1786,7 @@ function PlanStep({
         ? "Today is the day you realised something has to change.\n\nThe sooner you interrupt the cycle, the easier it becomes to rebuild control."
         : `You've known something has to change for ${timeframe}.\n\nThe sooner you interrupt the cycle, the easier it becomes to rebuild control.`,
       "Clean isn't just there to count sober days.\n\nIt's designed to help you interrupt cravings, rebuild routines, and stay consistent when difficult moments hit.",
-      `You currently spend around ${daily} a day — that's over ${yearly} a year.\n\nThat's not just money lost.\nIt's time, freedom, opportunities, and control.`,
+      `You currently spend around ${daily} a day — that's over ${yearly} a year.\n\nThat's not just money lost. It's time, freedom, opportunities, and control.`,
       `Getting back ${transformation} starts with breaking the patterns that have been pulling you backwards.`,
       "You've spent enough time stuck in the same cycle.\n\nNow let's start building something better.",
     ],
@@ -1912,6 +2029,12 @@ const PAYWALL_COPY: Record<
 
 const PAYWALL_HEADLINE = "Regain your sleep, money & health for less than a half";
 
+const isApplePayCapable =
+  typeof window !== "undefined" &&
+  /iP(hone|ad)/.test(navigator.userAgent) &&
+  /Safari/.test(navigator.userAgent) &&
+  !/CriOS|FxiOS|OPiOS/.test(navigator.userAgent);
+
 function PaywallSheet({
   open,
   onClose,
@@ -2077,18 +2200,33 @@ function PaywallSheet({
           </div>
         </div>
 
+        {/* Apple Pay — primary CTA on iOS Safari */}
         <PaywallExpressCheckout open={open} onError={reportWalletCheckoutError} />
 
-        <button
-          type="button"
-          onClick={handleCheckout}
-          disabled={checkoutLoading}
-          className={`mt-6 w-full rounded-full funnel-cta py-[1.15rem] text-sm font-extrabold uppercase tracking-wider text-white transition-transform active:scale-[0.98] ${
-            checkoutLoading ? "cursor-not-allowed opacity-70" : ""
-          }`}
-        >
-          {checkoutLoading ? "Starting checkout…" : "Claim Your Offer Now"}
-        </button>
+        {/* Redirect button — shown on non-iOS-Safari devices */}
+        {!isApplePayCapable && (
+          <button
+            onClick={handleCheckout}
+            disabled={checkoutLoading}
+            className={[
+              "mt-6 flex w-full items-center justify-center rounded-[50px] bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 px-8 py-5 text-[19px] font-extrabold shadow-[0_0_40px_rgba(129,140,248,0.55)] transition-transform active:scale-[0.98]",
+              checkoutLoading ? "cursor-not-allowed opacity-70" : "",
+            ].join(" ")}
+          >
+            {checkoutLoading ? "Starting checkout…" : "Claim Your Offer Now"}
+          </button>
+        )}
+
+        {/* Safety net — if Apple Pay errors on iOS, show redirect button */}
+        {isApplePayCapable && checkoutError && (
+          <button
+            onClick={handleCheckout}
+            disabled={checkoutLoading}
+            className="mt-3 flex w-full items-center justify-center rounded-[50px] bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 px-8 py-5 text-[19px] font-extrabold shadow-[0_0_40px_rgba(129,140,248,0.55)] transition-transform active:scale-[0.98]"
+          >
+            {checkoutLoading ? "Starting checkout…" : "Claim Your Offer Now"}
+          </button>
+        )}
 
         {checkoutError ? (
           <p className="mt-3 text-center text-sm leading-snug text-red-300" role="alert">

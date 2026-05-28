@@ -50,7 +50,29 @@ function ExpressCheckoutInner({ onPaymentError }: { onPaymentError: (message: st
     return null;
   }
 
-  return <ExpressCheckoutElement onConfirm={handleConfirm} />;
+  return (
+    <ExpressCheckoutElement
+      onConfirm={handleConfirm}
+      options={{
+        paymentMethods: {
+          applePay: "always",
+          googlePay: "never",
+          link: "never",
+          paypal: "never",
+        },
+        buttonType: {
+          applePay: "plain",
+        },
+        buttonTheme: {
+          applePay: "white",
+        },
+        layout: {
+          maxColumns: 1,
+          maxRows: 1,
+        },
+      }}
+    />
+  );
 }
 
 /**
@@ -125,7 +147,7 @@ export function PaywallExpressCheckout({
 
   if (loadingSecret || !clientSecret) {
     return (
-      <div className="mt-4 min-h-[44px]">
+      <div className="mt-6 min-h-[44px]">
         <p className="text-center text-xs text-white/50" aria-live="polite">
           {loadingSecret ? "Preparing Apple Pay…" : null}
         </p>
@@ -134,7 +156,7 @@ export function PaywallExpressCheckout({
   }
 
   return (
-    <div className="mt-4">
+    <div className="mt-6">
       <CheckoutElementsProvider
         stripe={stripePromise}
         options={{

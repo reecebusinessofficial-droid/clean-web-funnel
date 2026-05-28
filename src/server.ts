@@ -72,6 +72,14 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const { pathname } = new URL(request.url);
+      if (pathname === "/.well-known/apple-developer-merchantid-domain-association") {
+        const fileContent = await fetch(
+          "https://stripe.com/files/apple-pay/apple-developer-merchantid-domain-association",
+        );
+        return new Response(await fileContent.text(), {
+          headers: { "content-type": "text/plain" },
+        });
+      }
       if (pathname === "/api/create-checkout-session") {
         return handleCreateCheckoutSession(request, env);
       }

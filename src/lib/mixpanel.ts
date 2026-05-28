@@ -1,9 +1,27 @@
 import mixpanel from "mixpanel-browser";
 
+if (typeof window !== "undefined") {
+  console.log("[mixpanel] module loaded");
+}
+
 type EventProps = Record<string, unknown>;
 
 const SUBSTANCE = "cocaine";
 const DEDUPE_MS = 1000;
+
+/** TODO: remove after Mixpanel testing */
+const MIXPANEL_DEBUG = true;
+
+function debugLog(message: string, data?: Record<string, unknown>) {
+  if (!MIXPANEL_DEBUG) return;
+  if (data) console.log(`[mixpanel] ${message}`, data);
+  else console.log(`[mixpanel] ${message}`);
+}
+
+function hasMixpanelToken(): boolean {
+  const token = import.meta.env.VITE_MIXPANEL_TOKEN;
+  return Boolean(token && token !== "PASTE_TOKEN_HERE");
+}
 
 let initialized = false;
 const recentScreenViews = new Map<string, number>();
@@ -19,10 +37,18 @@ function getToken(): string | undefined {
 
 function initMixpanel(): boolean {
   if (typeof window === "undefined") return false;
-  if (initialized) return true;
+  if (initialized) {
+    debugLog("initialized", { initialized: true });
+    return true;
+  }
+
+  debugLog("VITE_MIXPANEL_TOKEN present", { hasToken: hasMixpanelToken() });
 
   const token = getToken();
-  if (!token) return false;
+  if (!token) {
+    debugLog("initialized", { initialized: false });
+    return false;
+  }
 
   mixpanel.init(token, {
     track_pageview: false,
@@ -30,6 +56,7 @@ function initMixpanel(): boolean {
     ignore_dnt: false,
   });
   initialized = true;
+  debugLog("initialized", { initialized: true });
   return true;
 }
 
@@ -89,6 +116,7 @@ function track(event: string, properties?: EventProps): void {
 
 /** Funnel step → Mixpanel screen_name */
 export const FUNNEL_STEP_SCREEN: Record<string, string> = {
+  landing: "landing",
   q_frequency: "substance_goal",
   transition1: "personalisation_intro",
   q_frustrates: "frustration_question",
@@ -112,6 +140,7 @@ export function screenNameForStep(step: string): string | undefined {
 }
 
 export function trackScreenView(screen_name: string, properties?: EventProps): void {
+  debugLog("trackScreenView called", { screen_name });
   if (shouldDedupe(recentScreenViews, screen_name)) return;
   track("Screen View", { screen_name, ...properties });
 }
@@ -122,6 +151,7 @@ export function trackQuizAnswered(
   properties?: EventProps,
 ): void {
   const answerKey = Array.isArray(answer) ? answer.join(",") : answer;
+  debugLog("trackQuizAnswered called", { question, answer: answerKey });
   const dedupeKey = `${question}:${answerKey}`;
   if (shouldDedupe(recentQuizAnswers, dedupeKey)) return;
 
