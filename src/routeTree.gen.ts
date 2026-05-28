@@ -13,6 +13,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PaywallRouteImport } from './routes/paywall'
 import { Route as FulfillmentRouteImport } from './routes/fulfillment'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -36,6 +37,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PaywallRoute = PaywallRouteImport.update({
+  id: '/paywall',
+  path: '/paywall',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FulfillmentRoute = FulfillmentRouteImport.update({
   id: '/fulfillment',
   path: '/fulfillment',
@@ -50,6 +56,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/fulfillment': typeof FulfillmentRoute
+  '/paywall': typeof PaywallRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
   '/success': typeof SuccessRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/fulfillment': typeof FulfillmentRoute
+  '/paywall': typeof PaywallRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
   '/success': typeof SuccessRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/fulfillment': typeof FulfillmentRoute
+  '/paywall': typeof PaywallRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
   '/success': typeof SuccessRoute
@@ -77,16 +86,25 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/fulfillment'
+    | '/paywall'
     | '/privacy'
     | '/refund'
     | '/success'
     | '/terms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/fulfillment' | '/privacy' | '/refund' | '/success' | '/terms'
+  to:
+    | '/'
+    | '/fulfillment'
+    | '/paywall'
+    | '/privacy'
+    | '/refund'
+    | '/success'
+    | '/terms'
   id:
     | '__root__'
     | '/'
     | '/fulfillment'
+    | '/paywall'
     | '/privacy'
     | '/refund'
     | '/success'
@@ -96,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FulfillmentRoute: typeof FulfillmentRoute
+  PaywallRoute: typeof PaywallRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundRoute: typeof RefundRoute
   SuccessRoute: typeof SuccessRoute
@@ -132,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/paywall': {
+      id: '/paywall'
+      path: '/paywall'
+      fullPath: '/paywall'
+      preLoaderRoute: typeof PaywallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fulfillment': {
       id: '/fulfillment'
       path: '/fulfillment'
@@ -152,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FulfillmentRoute: FulfillmentRoute,
+  PaywallRoute: PaywallRoute,
   PrivacyRoute: PrivacyRoute,
   RefundRoute: RefundRoute,
   SuccessRoute: SuccessRoute,
