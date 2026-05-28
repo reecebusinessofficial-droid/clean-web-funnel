@@ -2239,6 +2239,11 @@ function PaywallSheet({
         </button>
 
         <p className="mt-4 text-center text-[10px] leading-relaxed text-white/40">{legal}</p>
+
+        <footer className="mt-10 mb-6 flex justify-center gap-6 text-xs text-white/40">
+          <a href="/privacy" className="hover:text-white/70 transition-colors">Privacy Policy</a>
+          <a href="/terms" className="hover:text-white/70 transition-colors">Terms of Service</a>
+        </footer>
       </div>
     </div>
   );
