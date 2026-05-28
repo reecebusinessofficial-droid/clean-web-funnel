@@ -207,30 +207,23 @@ function PaywallPage() {
         {/* Apple Pay — primary CTA on iOS Safari */}
         <PaywallExpressCheckout open={true} onError={reportWalletCheckoutError} />
 
-        {/* Redirect button — shown on non-iOS-Safari devices */}
-        {!isApplePayCapable && (
-          <button
-            onClick={handleCheckout}
-            disabled={checkoutLoading}
-            className={[
-              "mt-6 flex w-full items-center justify-center rounded-[50px] bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 px-8 py-5 text-[19px] font-extrabold shadow-[0_0_40px_rgba(129,140,248,0.55)] transition-transform active:scale-[0.98]",
-              checkoutLoading ? "cursor-not-allowed opacity-70" : "",
-            ].join(" ")}
-          >
-            {checkoutLoading ? "Starting checkout…" : "Claim Your Offer Now"}
-          </button>
-        )}
+        {/* Card payment option */}
+        <div className="mt-4 flex items-center gap-3">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-xs text-white/40">or pay by card</span>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
 
-        {/* Safety net — if Apple Pay errors on iOS, show redirect button */}
-        {isApplePayCapable && checkoutError && (
-          <button
-            onClick={handleCheckout}
-            disabled={checkoutLoading}
-            className="mt-3 flex w-full items-center justify-center rounded-[50px] bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500 px-8 py-5 text-[19px] font-extrabold shadow-[0_0_40px_rgba(129,140,248,0.55)] transition-transform active:scale-[0.98]"
-          >
-            {checkoutLoading ? "Starting checkout…" : "Claim Your Offer Now"}
-          </button>
-        )}
+        <button
+          onClick={handleCheckout}
+          disabled={checkoutLoading}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-8 py-4 text-base font-semibold text-white transition-transform active:scale-[0.98]"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          {checkoutLoading ? "Starting checkout…" : "Pay by Card"}
+        </button>
 
         {checkoutError ? (
           <p className="mt-3 text-center text-sm leading-snug text-red-300" role="alert">

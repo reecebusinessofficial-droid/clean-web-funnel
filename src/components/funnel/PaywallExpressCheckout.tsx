@@ -57,6 +57,7 @@ function ExpressCheckoutInner({ onPaymentError }: { onPaymentError: (message: st
         paymentMethods: {
           applePay: "always",
           googlePay: "never",
+          amazonPay: "never",
           link: "never",
           paypal: "never",
         },
@@ -68,7 +69,7 @@ function ExpressCheckoutInner({ onPaymentError }: { onPaymentError: (message: st
         },
         layout: {
           maxColumns: 1,
-          maxRows: 1,
+          maxRows: 2,
         },
       }}
     />
