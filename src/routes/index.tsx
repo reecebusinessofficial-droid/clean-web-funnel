@@ -593,6 +593,10 @@ function Index() {
             {showFixedCta && step === "reset" && !paywallOpen && (
               <ResetFixedCta onContinue={() => setPaywallOpen(true)} entering={phase === "entering"} />
             )}
+            <div className="mt-6 mb-4 flex justify-center gap-6 text-xs text-white/40">
+              <a href="/privacy" className="hover:text-white/70 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-white/70 transition-colors">Terms of Service</a>
+            </div>
           </>
         )}
       >
