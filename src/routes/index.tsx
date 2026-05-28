@@ -1282,7 +1282,7 @@ function LandingStep({ onContinue }: { onContinue: () => void }) {
           </p>
         </blockquote>
 
-        <div className="mt-6 w-full">
+        <div className="mt-12 w-full">
           <button type="button" onClick={onContinue} className={`${FUNNEL_CTA_ROW} justify-center`}>
             <span>Start my transformation</span>
           </button>
