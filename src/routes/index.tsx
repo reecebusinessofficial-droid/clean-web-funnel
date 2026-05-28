@@ -89,9 +89,9 @@ const FUNNEL_PAD = "px-5";
 const FUNNEL_QUIZ_W = "mx-auto w-full max-w-[330px]";
 const FUNNEL_WELCOME_E_W = "mx-auto w-full max-w-[342px]";
 const FUNNEL_CTA =
-  "flex w-full min-h-[66px] items-center justify-center gap-2 rounded-[50px] funnel-cta text-[18px] font-bold transition-transform active:scale-[0.98]";
+  "flex w-full items-center justify-center gap-2 rounded-[50px] funnel-cta py-[18px] text-[17px] font-bold tracking-wide transition-transform active:scale-[0.98]";
 const FUNNEL_CTA_ROW =
-  "relative flex w-full min-h-[66px] items-center justify-between rounded-[50px] funnel-cta px-6 text-[18px] font-bold transition-transform active:scale-[0.98]";
+  "relative flex w-full items-center rounded-[50px] funnel-cta py-[18px] px-5 text-[17px] font-bold tracking-wide transition-transform active:scale-[0.98]";
 const FUNNEL_PILL =
   "flex w-full items-center gap-3 rounded-[50px] border px-4 py-3 text-left transition-all";
 const FUNNEL_PILL_ON = "border-transparent funnel-pill-selected";
@@ -593,10 +593,6 @@ function Index() {
             {showFixedCta && step === "reset" && !paywallOpen && (
               <ResetFixedCta onContinue={() => setPaywallOpen(true)} entering={phase === "entering"} />
             )}
-            <div className="mt-6 mb-4 flex justify-center gap-6 text-xs text-white/40">
-              <a href="/privacy" className="hover:text-white/70 transition-colors">Privacy Policy</a>
-              <a href="/terms" className="hover:text-white/70 transition-colors">Terms of Service</a>
-            </div>
           </>
         )}
       >
@@ -1223,13 +1219,8 @@ function ResultsStep({ substance, onContinue }: { substance: string; onContinue:
         </p>
 
         <div className="mt-8 w-full">
-          <button onClick={onContinue} className={`${FUNNEL_CTA_ROW} pl-8 pr-3`}>
-            <span className="flex-1 text-center">It's Time To Change</span>
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-black">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </span>
+          <button onClick={onContinue} className={`${FUNNEL_CTA_ROW} justify-center`}>
+            <span>It's Time To Change</span>
           </button>
           <p className="mt-3 text-center text-[10px] leading-relaxed text-white/40">
             * The result is an indication only, not a medical diagnosis. For a definitive assessment,
@@ -1282,7 +1273,7 @@ function LandingStep({ onContinue }: { onContinue: () => void }) {
         <img
           src={LANDING_IMG_CHARACTER}
           alt=""
-          className="mt-2 w-full origin-top scale-[1.2] object-contain"
+          className="mt-2 w-full origin-top scale-[1.44] object-contain"
         />
 
         <blockquote className="mt-4 max-w-[300px] text-center">
@@ -1292,33 +1283,15 @@ function LandingStep({ onContinue }: { onContinue: () => void }) {
         </blockquote>
 
         <div className="mt-6 w-full">
-          <button type="button" onClick={onContinue} className={`${FUNNEL_CTA_ROW} pl-8 pr-2.5`}>
-            <span className="flex-1 text-center">Start my transformation</span>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-black">
-              <svg
-                viewBox="0 0 24 24"
-                className="h-3.5 w-3.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-              >
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </span>
+          <button type="button" onClick={onContinue} className={`${FUNNEL_CTA_ROW} justify-center`}>
+            <span>Start my transformation</span>
           </button>
         </div>
 
-        <nav className="mt-5 flex items-center justify-center gap-8 text-sm text-white/40">
-          <a href="#" className="hover:text-white/60">
-            Terms
-          </a>
-          <a href="#" className="hover:text-white/60">
-            Privacy
-          </a>
-        </nav>
+        <div className="mt-8 mb-4 flex justify-center gap-6 text-xs text-white/40">
+          <a href="/privacy" className="hover:text-white/70 transition-colors">Privacy Policy</a>
+          <a href="/terms" className="hover:text-white/70 transition-colors">Terms of Service</a>
+        </div>
       </section>
     </div>
   );
@@ -1375,11 +1348,8 @@ function Welcome2Step({ onContinue }: { onContinue: () => void }) {
       </div>
 
       <div className={`${FUNNEL_WELCOME_E_W} ${showCta ? "animate-in fade-in duration-500" : "invisible"}`}>
-        <button onClick={onContinue} className={FUNNEL_CTA_ROW}>
-          <span className="flex-1 text-center">Continue To My Plan</span>
-          <span aria-hidden className="text-xl">
-            ›
-          </span>
+        <button onClick={onContinue} className={`${FUNNEL_CTA_ROW} justify-center`}>
+          <span>Continue To My Plan</span>
         </button>
       </div>
     </div>
@@ -1537,12 +1507,9 @@ function TestimonialsFixedCta({
         <button
           type="button"
           onClick={onContinue}
-          className={`pointer-events-auto relative ${FUNNEL_CTA_ROW}`}
+          className={`pointer-events-auto relative ${FUNNEL_CTA_ROW} justify-center`}
         >
-        <span className="flex-1 text-center">I Want Results Like These</span>
-        <span aria-hidden className="text-xl">
-          ›
-        </span>
+          <span>I Want Results Like These</span>
         </button>
       </div>
     </div>
@@ -1859,12 +1826,9 @@ function PlanStep({
       {isLast && done && (
         <button
           onClick={onContinue}
-          className={`${FUNNEL_CTA_ROW} animate-in fade-in duration-500`}
+          className={`${FUNNEL_CTA_ROW} justify-center animate-in fade-in duration-500`}
         >
-          <span className="flex-1 text-center">Start Rebuilding My Life</span>
-          <span aria-hidden className="text-xl">
-            ›
-          </span>
+          <span>Start Rebuilding My Life</span>
         </button>
       )}
     </div>
@@ -2018,14 +1982,14 @@ const PAYWALL_COPY: Record<
   { price: string; strikePrice: string; legal: string }
 > = {
   gb: {
-    price: "£0.99",
-    strikePrice: "£12.99",
+    price: "£19.99",
+    strikePrice: "£49.99",
     legal:
       "By continuing, you agree to the Terms of Service and Privacy Policy. Your subscription includes a 3-day introductory trial for £1, after which it automatically renews at £12.99/week unless cancelled before renewal. Cancel anytime through your account settings.",
   },
   us: {
-    price: "$0.99",
-    strikePrice: "$12.99",
+    price: "$19.99",
+    strikePrice: "$49.99",
     legal:
       "By continuing, you agree to the Terms of Service and Privacy Policy. Your subscription includes a 3-day introductory trial for $1, after which it automatically renews at $12.99/week unless cancelled before renewal. Cancel anytime through your account settings.",
   },
@@ -2243,9 +2207,9 @@ function PaywallSheet({
         </button>
 
         <div className="mt-6 rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-center text-[11px] leading-relaxed text-white/50">
-          This is an auto-renewing subscription. Your first payment is £0.99 as
+          This is an auto-renewing subscription. Your first payment is £19.99 as
           an introductory offer. All future payments will be automatically charged
-          at £12.99/month until you cancel. You can cancel by emailing{" "}
+          at £49.99/month until you cancel. You can cancel by emailing{" "}
           <a href="mailto:reece@cleanofficialapp.com" className="underline text-white/70">
             reece@cleanofficialapp.com
           </a>

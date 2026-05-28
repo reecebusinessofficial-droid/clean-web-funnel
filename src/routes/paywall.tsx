@@ -25,8 +25,8 @@ function detectPaywallLocale(): PaywallLocale {
 }
 
 const PAYWALL_COPY: Record<PaywallLocale, { price: string; strikePrice: string }> = {
-  gb: { price: "£0.99", strikePrice: "£12.99" },
-  us: { price: "$0.99", strikePrice: "$12.99" },
+  gb: { price: "£19.99", strikePrice: "£49.99" },
+  us: { price: "$19.99", strikePrice: "$49.99" },
 };
 
 const PAYWALL_HEADLINE = "Regain your sleep, money & health for less than a half";
@@ -188,7 +188,7 @@ function PaywallPage() {
 
         <div className="mt-6 overflow-hidden rounded-2xl border border-violet-500/50 shadow-[0_0_28px_rgba(91,33,182,0.35),0_0_20px_rgba(29,78,216,0.25)]">
           <div className="bg-gradient-to-r from-[#6d28d9] via-[#5b21b6] to-[#1d4ed8] py-2 text-center text-[11px] font-extrabold uppercase tracking-wider text-white">
-            Get access while this offer lasts!
+            Get access while this trial lasts!
           </div>
           <div className="flex items-center justify-between bg-neutral-950 px-5 py-4">
             <div>
@@ -259,8 +259,8 @@ function PaywallPage() {
         </button>
 
         <div className="mt-6 rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-center text-[11px] leading-relaxed text-white/50">
-          This is an auto-renewing subscription. Your first payment is £0.99 as an introductory
-          offer. All future payments will be automatically charged at £12.99/month until you cancel.
+          This is an auto-renewing subscription. Your first payment is £19.99 as an introductory
+          offer. All future payments will be automatically charged at £49.99/month until you cancel.
           You can cancel by emailing{" "}
           <a href="mailto:reece@cleanofficialapp.com" className="underline text-white/70">
             reece@cleanofficialapp.com
