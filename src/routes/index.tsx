@@ -403,7 +403,6 @@ type Step =
   | "results"
   | "welcome2"
   | "goals"
-  | "testimonials"
   | "plan"
   | "reset";
 
@@ -422,7 +421,6 @@ const STEP_ORDER: Step[] = [
   "results",
   "welcome2",
   "goals",
-  "testimonials",
   "plan",
   "reset",
 ];
@@ -587,10 +585,7 @@ function Index() {
         variantForStep={variantForStep}
         footer={({ showFixedCta, phase }) => (
           <>
-            {showFixedCta && step === "testimonials" && (
-              <TestimonialsFixedCta onContinue={next} entering={phase === "entering"} />
-            )}
-            {showFixedCta && step === "reset" && !paywallOpen && (
+{showFixedCta && step === "reset" && !paywallOpen && (
               <ResetFixedCta onContinue={() => setPaywallOpen(true)} entering={phase === "entering"} />
             )}
           </>
@@ -785,7 +780,7 @@ function Index() {
         />
       )}
 
-      {visibleStep === "testimonials" && <TestimonialsStep />}
+      {/* TestimonialsStep stashed — not in live flow */}
 
 
 
