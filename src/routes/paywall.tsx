@@ -211,12 +211,38 @@ function PaywallPage() {
         <button
           onClick={handleCheckout}
           disabled={checkoutLoading}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1c1c1e] border border-white/20 px-8 py-4 text-base font-semibold text-white transition-transform active:scale-[0.98]"
+          className="mt-3 flex w-full items-center justify-between rounded-2xl bg-white/10 border border-white/15 px-5 py-4 transition-transform active:scale-[0.98]"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-          </svg>
-          {checkoutLoading ? "Starting checkout…" : "Pay by Card"}
+          <div className="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <span className="text-base font-semibold text-white">
+              {checkoutLoading ? "Starting checkout…" : "Pay by Card"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {/* Visa */}
+            <div className="flex h-6 w-10 items-center justify-center rounded bg-white px-1">
+              <svg viewBox="0 0 48 16" className="h-3.5 w-auto">
+                <text x="0" y="13" fontFamily="Arial" fontWeight="bold" fontSize="14" fill="#1a1f71">VISA</text>
+              </svg>
+            </div>
+            {/* Mastercard */}
+            <div className="flex h-6 w-10 items-center justify-center rounded bg-[#252525] px-1">
+              <svg viewBox="0 0 38 24" className="h-5 w-auto">
+                <circle cx="13" cy="12" r="11" fill="#eb001b"/>
+                <circle cx="25" cy="12" r="11" fill="#f79e1b"/>
+                <path d="M19 4.8a11 11 0 0 1 0 14.4A11 11 0 0 1 19 4.8z" fill="#ff5f00"/>
+              </svg>
+            </div>
+            {/* Amex */}
+            <div className="flex h-6 w-10 items-center justify-center rounded bg-[#2557d6] px-1">
+              <svg viewBox="0 0 48 16" className="h-3 w-auto">
+                <text x="0" y="12" fontFamily="Arial" fontWeight="bold" fontSize="11" fill="white">AMEX</text>
+              </svg>
+            </div>
+          </div>
         </button>
 
         {checkoutError ? (
