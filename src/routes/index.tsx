@@ -2169,7 +2169,7 @@ function PaywallSheet({
         </div>
 
         {/* Apple Pay — primary CTA on iOS Safari */}
-        <PaywallExpressCheckout open={open} onError={reportWalletCheckoutError} />
+        <PaywallExpressCheckout open={open} prefetch={true} onError={reportWalletCheckoutError} />
 
         {/* Redirect button — shown on non-iOS-Safari devices */}
         {!isApplePayCapable && (

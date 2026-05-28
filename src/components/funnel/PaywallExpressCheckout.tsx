@@ -83,16 +83,18 @@ function ExpressCheckoutInner({ onPaymentError }: { onPaymentError: (message: st
  */
 export function PaywallExpressCheckout({
   open,
+  prefetch,
   onError,
 }: {
   open: boolean;
+  prefetch?: boolean;
   onError: (message: string) => void;
 }) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingSecret, setLoadingSecret] = useState(false);
 
   useEffect(() => {
-    if (!open || !stripePromise) {
+    if ((!open && !prefetch) || !stripePromise) {
       setClientSecret(null);
       setLoadingSecret(false);
       return;
@@ -138,7 +140,7 @@ export function PaywallExpressCheckout({
     return () => {
       cancelled = true;
     };
-  }, [open, onError]);
+  }, [open, prefetch, onError]);
 
   if (!stripePromise || !publishableKey) {
     return null;
