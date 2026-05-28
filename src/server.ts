@@ -80,6 +80,20 @@ export default {
           headers: { "content-type": "text/plain" },
         });
       }
+      if (pathname === "/api/meta-purchase") {
+        const accessToken = (env as Record<string, string>).META_CONVERSIONS_API_TOKEN;
+        if (!accessToken) return new Response("Missing token", { status: 500 });
+
+        const cookies = request.headers.get("cookie") ?? "";
+        const fbc = cookies.match(/_fbc=([^;]+)/)?.[1];
+        const fbp = cookies.match(/_fbp=([^;]+)/)?.[1];
+
+        const { buildPurchaseEvent, sendMetaConversionsEvent } = await import("./lib/metaConversionsApi");
+        const event = buildPurchaseEvent({ request, fbc, fbp });
+        await sendMetaConversionsEvent({ accessToken, event });
+        return new Response("ok", { status: 200 });
+      }
+
       if (pathname === "/api/create-checkout-session") {
         return handleCreateCheckoutSession(request, env);
       }

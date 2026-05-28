@@ -42,6 +42,7 @@ function SuccessPage() {
     trackScreenView("success");
     trackMetaPurchase();
     trackPurchaseCompleted();
+    fetch("/api/meta-purchase", { method: "POST" }).catch(() => {});
   }, []);
 
   async function handleCreateAccount(e: React.FormEvent) {
