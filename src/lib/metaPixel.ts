@@ -4,15 +4,21 @@ export function trackMetaInitiateCheckout(): void {
   if (typeof window === "undefined") return;
   const { fbq } = window;
   if (typeof fbq !== "function") return;
-  fbq("track", "InitiateCheckout");
+  fbq("track", "InitiateCheckout", {
+    value: 19.99,
+    currency: "GBP",
+    content_ids: ["clean_premium"],
+    content_type: "product",
+  });
 }
 
 export function trackMetaPurchase(): void {
   if (typeof window === "undefined") return;
   if (typeof window.fbq !== "function") return;
-  // TODO: set value/currency from verified Stripe session or webhook data.
   window.fbq("track", "Purchase", {
-    value: 20,
+    value: 19.99,
     currency: "GBP",
+    content_ids: ["clean_premium"],
+    content_type: "product",
   });
 }
