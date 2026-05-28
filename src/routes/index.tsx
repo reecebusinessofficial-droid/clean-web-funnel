@@ -2242,7 +2242,24 @@ function PaywallSheet({
           Restore Purchase
         </button>
 
-        <p className="mt-4 text-center text-[10px] leading-relaxed text-white/40">{legal}</p>
+        <div className="mt-6 rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-center text-[11px] leading-relaxed text-white/50">
+          This is an auto-renewing subscription. Your first payment is £0.99 as
+          an introductory offer. All future payments will be automatically charged
+          at £12.99/month until you cancel. You can cancel by emailing{" "}
+          <a href="mailto:reece@cleanofficialapp.com" className="underline text-white/70">
+            reece@cleanofficialapp.com
+          </a>
+          {". "}
+          This subscription is bound by our{" "}
+          <a href="/privacy" className="underline text-white/70">Privacy Policy</a>
+          {", "}
+          <a href="/fulfillment" className="underline text-white/70">Fulfillment Policy</a>
+          {", "}
+          <a href="/terms" className="underline text-white/70">Terms of Use</a>
+          {" and "}
+          <a href="/refund" className="underline text-white/70">Refund Policy</a>
+          {"."}
+        </div>
 
         <footer className="mt-10 mb-6 flex justify-center gap-6 text-xs text-white/40">
           <a href="/privacy" className="hover:text-white/70 transition-colors">Privacy Policy</a>
