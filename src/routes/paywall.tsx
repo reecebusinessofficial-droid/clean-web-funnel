@@ -208,16 +208,10 @@ function PaywallPage() {
         <PaywallExpressCheckout open={true} onError={reportWalletCheckoutError} />
 
         {/* Card payment option */}
-        <div className="mt-4 flex items-center gap-3">
-          <div className="h-px flex-1 bg-white/10" />
-          <span className="text-xs text-white/40">or pay by card</span>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
-
         <button
           onClick={handleCheckout}
           disabled={checkoutLoading}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-8 py-4 text-base font-semibold text-white transition-transform active:scale-[0.98]"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1c1c1e] border border-white/20 px-8 py-4 text-base font-semibold text-white transition-transform active:scale-[0.98]"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
