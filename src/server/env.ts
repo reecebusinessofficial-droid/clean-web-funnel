@@ -22,7 +22,7 @@ export function readServerEnv(env: unknown): {
     stripeProductId:
       bindings.STRIPE_PRODUCT_ID ??
       (typeof process !== "undefined" ? process.env.STRIPE_PRODUCT_ID : undefined) ??
-      "prod_UaeCpKBTq8LYB0",
+      "prod_UbINUYGhr1SUUa",
     siteUrl:
       bindings.SITE_URL ?? (typeof process !== "undefined" ? process.env.SITE_URL : undefined),
   };
