@@ -11,7 +11,7 @@ export type CreateCheckoutSessionCustomResult = {
   sessionId: string;
 };
 
-const INTRO_PRICE_ID = "price_1Tc5nA1Wk1spUrOQN8qABFbJ";
+const INTRO_PRICE_ID = "price_1TcAYk1Wk1spUrOQTJF0jk9p";
 
 /**
  * Creates a one-time Payment Intent for the intro charge (£12.99).
